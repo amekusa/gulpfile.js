@@ -3,12 +3,14 @@
  * @author amekusa
  */
 
+const fs = require('node:fs');
 const { exec } = require('node:child_process');
 const { Transform } = require('node:stream');
 
 const x = {
 
 	/**
+	 * Executes the given shell command, and returns a Promise that resolves the stdout
 	 * @return {Promise}
 	 */
 	exec(cmd) {
@@ -21,10 +23,22 @@ const x = {
 	},
 
 	/**
+	 * Deletes the contents of the given directory
 	 * @return {Promise}
 	 */
-	clean(dir, fn, depth = 1) {
-		return this.exec(`find '${dir}' -type f -maxdepth ${depth} -delete`, fn);
+	clean(dir, pattern, depth = 1) {
+		return x.exec(`find '${dir}' -type f -name '${pattern}' -maxdepth ${depth} -delete`);
+	},
+
+	/**
+	 * Deletes the given file or directory
+	 * @param {string} file
+	 * @return {Promise}
+	 */
+	rm(file) {
+		return new Promise((resolve, reject) => {
+			fs.rm(file, { force: true, recursive: true }, err => err ? reject(err) : resolve());
+		});
 	},
 
 	/**
