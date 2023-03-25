@@ -11,10 +11,19 @@ const x = {
 
 	/**
 	 * Executes the given shell command, and returns a Promise that resolves the stdout
+	 * @param {string} cmd
+	 * @param {object} [opts]
 	 * @return {Promise}
 	 */
-	exec(cmd) {
+	exec(cmd, opts = {}) {
+		opts = Object.assign({
+			dryRun: false,
+		}, opts);
 		return new Promise((resolve, reject) => {
+			if (opts.dryRun) {
+				console.log(`[DRYRUN] ${cmd}`);
+				return resolve();
+			}
 			exec(cmd, (err, stdout, stderr) => {
 				if (err) reject(stderr);
 				resolve(stdout);
