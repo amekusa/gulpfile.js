@@ -32,6 +32,34 @@ const x = {
 	},
 
 	/**
+	 * Converts the given objects to shell arguments in a string form
+	 * @param {object} args
+	 * @param {object} [opts]
+	 * @return {string}
+	 */
+	args(args, opts = {}) {
+		opts = Object.assign({
+			sep: ' ', // key-value separator
+		}, opts);
+		let r = [];
+		for (let key in args) {
+			let value = args[key];
+			switch (typeof value) {
+			case 'boolean':
+				r.push(key);
+				break;
+			case 'number':
+				r.push(key + opts.sep + value);
+				break;
+			case 'string':
+				r.push(key + opts.sep + `"${value}"`);
+				break;
+			}
+		}
+		return r.join(' ');
+	},
+
+	/**
 	 * Deletes the contents of the given directory
 	 * @return {Promise}
 	 */
