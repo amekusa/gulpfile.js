@@ -81,6 +81,14 @@ const x = {
 	/**
 	 * Returns a Transform stream object with the given function as its transform() method.
 	 * `fn` must return a string which is to be the new content, or a Promise which resolves a string.
+	 *
+	 * @example
+	 * return gulp.src(src)
+	 *   .pipe(modify((data, enc) => {
+	 *     // do stuff
+	 *     return newData;
+	 *   }));
+	 *
 	 * @param {function} fn
 	 * @return {Transform}
 	 * @author amekusa
