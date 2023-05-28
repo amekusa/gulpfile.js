@@ -3,11 +3,12 @@
  * @author amekusa
  */
 
-const fs = require('node:fs');
+const fs = require('node:fs/promises');
+const { join, basename, dirname } = require('node:path');
 const { exec } = require('node:child_process');
 const { Transform } = require('node:stream');
 
-const x = {
+const X = {
 
 	/**
 	 * Executes the given shell command, and returns a Promise that resolves the stdout
@@ -64,7 +65,7 @@ const x = {
 	 * @return {Promise}
 	 */
 	clean(dir, pattern, depth = 1) {
-		return x.exec(`find '${dir}' -type f -name '${pattern}' -maxdepth ${depth} -delete`);
+		return X.exec(`find '${dir}' -type f -name '${pattern}' -maxdepth ${depth} -delete`);
 	},
 
 	/**
@@ -73,9 +74,37 @@ const x = {
 	 * @return {Promise}
 	 */
 	rm(file) {
-		return new Promise((resolve, reject) => {
-			fs.rm(file, { force: true, recursive: true }, err => err ? reject(err) : resolve());
+		return fs.rm(file, { force: true, recursive: true });
+	},
+
+	/**
+	 * Copies the given file(s) to another directory
+	 * @param {string|object|string[]|object[]} src
+	 * @param {string} dst Base destination directory
+	 * @return {Promise}
+	 */
+	copy(src, dst) {
+		let proms = [];
+		(Array.isArray(src) ? src : [src]).forEach(item => {
+			let _src, _dst;
+			switch (typeof item) {
+			case 'object':
+				_src = item.src;
+				_dst = item.dst;
+				break;
+			case 'string':
+				_src = item;
+				break;
+			default:
+				throw 'invalid type';
+			}
+			_dst = join(dst, _dst || basename(_src));
+			proms.push(
+				fs.mkdir(dirname(_dst), { recursive: true })
+				.then(fs.copyFile(_src, _dst))
+			);
 		});
+		return Promise.all(proms);
 	},
 
 	/**
@@ -115,4 +144,4 @@ const x = {
 
 };
 
-module.exports = x;
+module.exports = X;
